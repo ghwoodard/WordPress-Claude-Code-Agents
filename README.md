@@ -18,10 +18,18 @@ Enterprise-grade WordPress development toolkit for Claude Code with 15+ years of
 
 ## 🚀 Quick Start
 
-### 1. Install Claude Code
+### 1. Install Claude Code (Choose Your Setup)
+
+#### Option A: Claude Code CLI Only
 ```bash
 npm install -g @anthropic-ai/claude-code
 ```
+
+#### Option B: Claude Desktop + IDE Integration
+1. Install [Claude Desktop](https://claude.ai/download)
+2. Install Claude Code CLI: `npm install -g @anthropic-ai/claude-code`
+3. Configure your IDE (VS Code, Cursor, etc.) with Claude Code extension
+4. Set up Claude Desktop for project management and Claude Code for development
 
 ### 2. Clone This Repository
 ```bash
@@ -40,6 +48,8 @@ cp commands/*.md ~/.claude/commands/
 ```
 
 ### 4. Verify Installation
+
+#### For Claude Code CLI Users:
 ```bash
 # Start Claude Code in any WordPress project
 cd /path/to/your/wordpress/project
@@ -49,6 +59,13 @@ claude
 # Try using an agent:
 "Use wp-architect to design a membership plugin with subscription management"
 ```
+
+#### For Claude Desktop + IDE Users:
+1. Open Claude Desktop
+2. Create a new WordPress project or open existing
+3. Use Claude Desktop for planning and architecture discussions
+4. Switch to Claude Code CLI in your IDE for implementation
+5. Both environments will have access to your WordPress agents
 
 ## 🏗️ Repository Structure
 
@@ -66,19 +83,6 @@ wordpress-claude-agents/
 │   ├── README.md                   # Complete setup and usage guide
 │   ├── wp-prompt-engineering.md    # Advanced prompting techniques
 │   └── comprehensive-guide.md      # Full enterprise development guide
-├── templates/                      # Template Files
-│   ├── CLAUDE.md.template          # Project context template
-│   ├── plugin-structure/           # WordPress plugin templates
-│   └── theme-structure/            # WordPress theme templates
-├── examples/                       # Example Projects
-│   ├── contact-form-plugin/        # Complete plugin example
-│   ├── custom-theme/               # Custom theme example
-│   └── e-commerce-solution/        # E-commerce implementation
-├── tools/                          # Development Tools
-│   ├── setup-scripts/              # Automated setup scripts
-│   ├── quality-checks/             # Quality assurance tools
-│   └── ci-cd/                      # CI/CD configuration files
-├── LICENSE                         # MIT License
 └── README.md                       # This file
 ```
 
@@ -233,27 +237,7 @@ We've created a complete enterprise development guide:
 - **PHP** 8.0+ 
 - **Node.js** 18+
 - **Git**
-- **Claude Code CLI**
-
-### Development Tools (Recommended)
-```bash
-# WordPress CLI
-curl -O https://raw.githubusercontent.com/wp-cli/wp-cli/main/wp-cli.phar
-
-# WordPress Coding Standards
-composer global require "squizlabs/php_codesniffer=*"
-composer global require wp-coding-standards/wpcs
-
-# WordPress Security Scanner
-gem install wpscan
-
-# Accessibility Testing
-npm install -g pa11y
-
-# Static Analysis
-composer require --dev phpstan/phpstan
-composer require --dev szepeviktor/phpstan-wordpress
-```
+- **Claude Code CLI** and/or **Claude Desktop**
 
 ## 🔄 Example Workflows
 
