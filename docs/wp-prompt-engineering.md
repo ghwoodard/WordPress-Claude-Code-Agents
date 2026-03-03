@@ -10,15 +10,18 @@ Advanced prompt engineering techniques optimized for WordPress development with 
 WordPress Environment -> WordPress Standards -> WordPress Implementation
 Project Context -> WordPress Requirements -> Specific WordPress Task
 WordPress Security -> WordPress Performance -> WordPress Quality
+Block Theme / FSE -> Interactivity API -> Script Modules
+PHP 8.2+ Patterns -> Core Web Vitals -> Accessibility (WCAG 2.1 AA)
 ```
 
 ### WordPress-Focused Instructions
 Always structure WordPress prompts with these layers:
 
-1. **WordPress Environment Context**: Version, multisite, hosting
-2. **WordPress Project Context**: Theme/plugin, custom post types, integrations
-3. **WordPress Standards**: WPCS, security, performance requirements
-4. **WordPress Task Specifics**: Exact implementation requirements
+1. **WordPress Environment Context**: Version (6.7+), PHP version (8.2+), multisite, hosting
+2. **WordPress Project Context**: Block theme/classic theme, FSE status, custom post types, integrations
+3. **WordPress Standards**: WPCS, security (CSP headers), Core Web Vitals, accessibility
+4. **WordPress Modern Patterns**: Interactivity API, Script Modules, theme.json v3, block.json apiVersion 3
+5. **WordPress Task Specifics**: Exact implementation requirements
 
 ## 🔒 WordPress Security Prompt Patterns
 
@@ -31,9 +34,12 @@ Every WordPress implementation MUST include:
 - Nonce verification for all form submissions
 - Capability checks using current_user_can()
 - SQL preparation using $wpdb->prepare()
+- Security headers (CSP with nonces, HSTS, X-Frame-Options, X-Content-Type-Options)
+- PHP 8.2+ strict typing compatibility
 
 FORBIDDEN: Direct $_POST, $_GET usage without sanitization (-$1000 penalty)
 FORBIDDEN: Database queries without $wpdb->prepare() (-$2000 penalty)
+FORBIDDEN: Using unsafe-inline in CSP without nonces (-$500 penalty)
 ```
 
 ### WordPress Security Validation Pattern
@@ -58,11 +64,17 @@ All WordPress code MUST:
 - Optimize WordPress queries (WP_Query best practices)
 - Implement proper WordPress hook priorities
 - Use conditional loading for admin/frontend code
+- Meet Core Web Vitals targets (LCP < 2.5s, INP < 200ms, CLS < 0.1)
+- Support Speculation Rules API for instant navigation
+- Use Script Modules for modern JavaScript (not jQuery for new code)
+- Implement block-scoped CSS (not global stylesheet bloat)
 
 WordPress Performance Penalties:
 - N+1 query patterns: -$1000
 - Missing caching on expensive operations: -$500
 - Unbounded WordPress queries: -$1000
+- jQuery usage for new frontend interactions: -$500
+- Core Web Vitals failures: -$500
 ```
 
 ### WordPress Query Optimization Pattern
@@ -81,7 +93,7 @@ WordPress Database Query Checklist:
 ### WordPress Component Decision Framework
 ```markdown
 WordPress Architecture Decision Tree:
-1. Is this theme-specific presentation? → Theme
+1. Is this theme-specific presentation? → Block Theme (with theme.json v3)
 2. Is this site-wide functionality? → Plugin
 3. Is this network-wide multisite? → MU-Plugin
 4. Is this content structure? → Custom Post Type/Taxonomy
@@ -89,10 +101,15 @@ WordPress Architecture Decision Tree:
 6. Is this post-specific data? → Post Meta
 7. Is this site-wide settings? → Options API
 8. Is this complex relational data? → Custom Tables (with justification)
+9. Is this a reusable layout? → Block Pattern or Synced Pattern
+10. Is this a site structure element? → Template Part (header, footer, sidebar)
+11. Is this frontend interactivity? → Interactivity API (not jQuery)
+12. Is this a custom editor experience? → Custom Block (block.json apiVersion 3)
 
 WordPress File Location Decision:
-- Theme: Presentation, template overrides, theme-specific functions
-- Plugin: Core functionality, business logic, integrations
+- Block Theme: Presentation, templates, template parts, patterns, theme.json v3
+- Classic Theme: Legacy presentation (prefer block theme for new projects)
+- Plugin: Core functionality, business logic, custom blocks, integrations
 - MU-Plugin: Network-wide functionality, must-have features
 ```
 
@@ -102,18 +119,65 @@ WordPress Coding Standards Enforcement:
 BEFORE writing ANY WordPress code, verify:
 - Function/class names properly prefixed
 - WordPress naming conventions followed
-- WordPress file structure conventions used
+- WordPress file structure conventions used (block theme for new projects)
 - WordPress hook naming patterns used
 - WordPress translation functions used
-- WordPress enqueueing for scripts/styles
+- Script Modules for modern JS, legacy enqueue for backwards-compat
 - WordPress phpDoc documentation format
+- theme.json v3 for block theme configuration
+- block.json apiVersion 3 for custom blocks
+- PHP 8.2+ patterns (typed properties, enums, match expressions)
 
 AUTOMATIC FAILURE triggers:
 - Global variables without prefix
 - Direct database queries
-- Inline CSS/JavaScript
+- Inline CSS/JavaScript without CSP nonces
 - Missing text domains
 - Core WordPress file modifications
+- jQuery for new frontend interactions (use Interactivity API)
+- viewScript for Interactivity API code (must use viewScriptModule)
+- PHP dynamic properties without #[AllowDynamicProperties] (PHP 8.2+)
+```
+
+## 🏗️ WordPress Block Theme / FSE Prompt Patterns
+
+### Block Theme Development Instructions
+```markdown
+## WordPress Block Theme Requirements (Standard for New Projects)
+All new WordPress themes MUST:
+- Use theme.json v3 as the single source of truth for settings and styles
+- Include $schema declaration for IDE autocompletion and validation
+- Define templates as HTML files in /templates/ (not PHP template files)
+- Define template parts (header, footer) in /parts/
+- Register block patterns in /patterns/
+- Provide style variations in /styles/
+- Use block-scoped CSS (not global stylesheet bloat)
+- Support Full Site Editing (Site Editor) workflows
+
+theme.json v3 Structure:
+- settings: Controls editor UI tools and available options
+- styles: Applies actual visual rules to the site
+- templateParts: Defines structural components (header, footer)
+- customTemplates: Defines custom page templates
+- patterns: Registers bundled block patterns
+```
+
+### Interactivity API Instructions
+```markdown
+## WordPress Interactivity API Requirements (WP 6.5+)
+For ALL frontend interactivity in blocks:
+- Use Interactivity API (NOT jQuery or custom JS frameworks)
+- Set "supports": { "interactivity": true } in block.json
+- Use "viewScriptModule" (NOT "viewScript") for Interactivity API scripts
+- Use apiVersion 3 in block.json
+- Build with --experimental-modules flag for wp-scripts
+- Use state, context, or derived state for directive attribute values
+- NEVER use store functions in directives for attribute values (WP 6.8+ deprecation)
+- Support client-side navigation via @wordpress/interactivity-router (WP 6.9+)
+
+Script Module Registration (non-block scripts):
+- Use wp_register_script_module() + wp_enqueue_script_module()
+- Depend on '@wordpress/interactivity' for Interactivity API usage
 ```
 
 ## 🧪 WordPress Testing Prompt Patterns
@@ -338,63 +402,73 @@ WordPress Quality Gates (ALL must pass):
 Create a WordPress plugin for [functionality] with the following requirements:
 
 WordPress Environment:
-- WordPress Version: 6.4+
-- PHP Version: 8.0+
+- WordPress Version: 6.7+ (6.8+ recommended)
+- PHP Version: 8.2+ (8.4+ recommended)
 - Multisite: Compatible
 - Environment: Production-ready
 
 WordPress Standards:
 - Follow WordPress Coding Standards (WPCS) exactly
-- Implement proper WordPress security (nonces, capabilities, sanitization)
-- Optimize for WordPress performance (caching, query optimization)
+- Implement proper WordPress security (nonces, capabilities, sanitization, CSP headers)
+- Optimize for WordPress performance (caching, Core Web Vitals, query optimization)
 - Support WordPress internationalization
 - Include comprehensive WordPress testing
+- Target PHP 8.2+ with modern patterns
 
 WordPress Implementation:
 - Plugin structure following WordPress best practices
+- Custom blocks with block.json apiVersion 3 and Interactivity API
 - WordPress hooks and filters with appropriate priorities
 - WordPress database operations using WordPress APIs
 - WordPress admin interface following WordPress UI guidelines
 - WordPress REST API endpoints (if applicable)
+- Script Modules for modern JavaScript
 
 WordPress Quality Assurance:
 - Zero WPCS violations
 - Zero security vulnerabilities
-- Performance within WordPress benchmarks
+- Core Web Vitals within targets (LCP < 2.5s, INP < 200ms, CLS < 0.1)
 - Full WordPress test coverage
 - Complete WordPress documentation
+- WCAG 2.1 AA accessibility compliance
 
 CRITICAL: Use only WordPress-specific patterns and APIs. No generic PHP frameworks.
+CRITICAL: Use Interactivity API for frontend interactions, not jQuery.
+```
 ```
 
-### WordPress Theme Development Prompt  
+### WordPress Theme Development Prompt
 ```markdown
-Develop a WordPress theme for [purpose] following WordPress theme requirements:
+Develop a WordPress block theme for [purpose] following WordPress theme requirements:
 
-WordPress Theme Requirements:
+WordPress Block Theme Requirements:
 - WordPress Theme Review guidelines compliance
+- Full Site Editing (FSE) support with Site Editor
+- theme.json v3 as single source of truth for settings and styles
 - Responsive design with WordPress best practices
 - Accessibility (WCAG 2.1 AA compliance)
-- WordPress Customizer integration
-- WordPress block editor (Gutenberg) compatibility
+- WordPress block editor full compatibility
 - WordPress theme unit test data compatibility
 
-WordPress Theme Structure:
-- Required WordPress template files (style.css, index.php, functions.php)
-- WordPress template hierarchy compliance
-- WordPress theme hooks and filters
-- WordPress enqueuing for all assets
-- WordPress theme options using Customizer API
-- WordPress navigation menus support
+WordPress Block Theme Structure:
+- style.css (theme header), functions.php, theme.json (v3)
+- /templates/ directory with HTML block templates
+- /parts/ directory with template parts (header.html, footer.html)
+- /patterns/ directory with block patterns
+- /styles/ directory with style variations
+- WordPress navigation menus support via Navigation block
+- Script Modules for modern JavaScript
 
 WordPress Performance:
 - Optimized WordPress queries
-- Proper WordPress asset loading
-- WordPress image optimization support
+- Block-scoped CSS loading (not global stylesheet bloat)
+- WordPress image optimization support (WebP, AVIF, responsive)
 - WordPress caching compatibility
-- Minimal WordPress database queries
+- Core Web Vitals targets (LCP < 2.5s, INP < 200ms, CLS < 0.1)
+- Speculation Rules API support for instant navigation
 
-CRITICAL: This is a WordPress theme, not a generic web template. Use WordPress-specific approaches exclusively.
+CRITICAL: This is a WordPress block theme, not a classic theme or generic web template.
+Use FSE patterns, theme.json v3, and WordPress-specific approaches exclusively.
 ```
 
 ## 🎨 Advanced WordPress Prompt Techniques
