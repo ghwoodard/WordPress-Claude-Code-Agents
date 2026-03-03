@@ -57,34 +57,38 @@ Create a `CLAUDE.md` file in your WordPress project root with WordPress-specific
 # WordPress Project Context
 
 ## WordPress Environment
-- WordPress Version: 6.4+
-- PHP Version: 8.0+  
+- WordPress Version: 6.7+ (6.8+ recommended)
+- PHP Version: 8.2+ (8.4+ recommended)
 - Multisite: Yes/No
 - Environment: Development/Staging/Production
 
 ## WordPress Architecture
-- Theme: Custom/Parent Theme Name
+- Theme Type: Block Theme (FSE) / Classic Theme
+- theme.json Version: 3
 - Active Plugins: [List critical plugins]
 - Custom Post Types: [List custom post types]
 - Custom Taxonomies: [List custom taxonomies]
+- Custom Blocks: [List with Interactivity API usage]
 
 ## WordPress Standards
 - Coding Standards: WordPress (WPCS)
-- Security: VIP Go Standards / Custom requirements
-- Performance: [Specific requirements]
+- Security: VIP Go Standards / Custom requirements (including CSP headers)
+- Performance: Core Web Vitals (LCP < 2.5s, INP < 200ms, CLS < 0.1)
 - Testing Framework: PHPUnit / WP-CLI testing
+- Accessibility: WCAG 2.1 AA
 
 ## WordPress Development Workflow
-- Build Commands: npm run build, gulp build
-- Testing Commands: phpunit, wp test run
+- Build Commands: npx wp-scripts build --experimental-modules, npm run build
+- Testing Commands: phpunit, npx wp-scripts test-unit-js
 - Linting Commands: phpcs --standard=WordPress
-- Security Commands: wpscan, phpstan
+- Static Analysis: phpstan analyse --level=8
+- Security Commands: phpstan, security audit plugins
 ```
 
 ### 4. Install WordPress Development Tools
 
 ```bash
-# Install WordPress Coding Standards
+# Install WordPress Coding Standards (WPCS 3.x)
 composer global require "squizlabs/php_codesniffer=*"
 composer global require wp-coding-standards/wpcs
 phpcs --config-set installed_paths ~/.composer/vendor/wp-coding-standards/wpcs
@@ -94,11 +98,11 @@ curl -O https://raw.githubusercontent.com/wp-cli/wp-cli/main/wp-cli.phar
 chmod +x wp-cli.phar
 sudo mv wp-cli.phar /usr/local/bin/wp
 
-# Install PHPStan for WordPress
+# Install PHPStan for WordPress (PHP 8.2+ static analysis)
 composer require --dev szepeviktor/phpstan-wordpress
 
-# Install WordPress security scanner
-gem install wpscan
+# Install WordPress block development tools
+npm install --save-dev @wordpress/scripts @wordpress/interactivity
 ```
 
 ## 🎯 WordPress Agents Overview
@@ -313,15 +317,20 @@ Add project-specific WordPress requirements to your `CLAUDE.md`:
 Set in your `.env` or `wp-config.php`:
 
 ```php
-// WordPress debugging (development only)
+// WordPress debugging (development only - NEVER in production)
 define( 'WP_DEBUG', true );
 define( 'WP_DEBUG_LOG', true );
+define( 'WP_DEBUG_DISPLAY', false );
 define( 'SCRIPT_DEBUG', true );
 define( 'SAVEQUERIES', true );
 
 // WordPress performance monitoring
 define( 'WP_MEMORY_LIMIT', '512M' );
 define( 'WP_MAX_MEMORY_LIMIT', '1024M' );
+
+// Security headers (add via .htaccess, nginx config, or plugin)
+// Content-Security-Policy, Strict-Transport-Security, X-Frame-Options
+// X-Content-Type-Options: nosniff, Referrer-Policy
 ```
 
 ### WordPress Quality Configuration

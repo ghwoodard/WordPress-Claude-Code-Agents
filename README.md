@@ -1,9 +1,9 @@
 # WordPress Claude Code Agents: Enterprise Development Toolkit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![WordPress](https://img.shields.io/badge/WordPress-6.4+-blue.svg)](https://wordpress.org/)
+[![WordPress](https://img.shields.io/badge/WordPress-6.7+-blue.svg)](https://wordpress.org/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Compatible-green.svg)](https://docs.anthropic.com/en/docs/claude-code)
-[![PHP](https://img.shields.io/badge/PHP-8.0+-purple.svg)](https://php.net/)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-purple.svg)](https://php.net/)
 
 Enterprise-grade WordPress development toolkit for Claude Code with 15+ years of WordPress expertise built-in. Transform your WordPress development workflow with AI-powered agents that understand WordPress architecture, security, performance, and best practices.
 
@@ -192,20 +192,31 @@ wordpress-claude-agents/
 - **Nonce Verification**: `wp_nonce_field()`, `wp_verify_nonce()`
 - **Capability Checks**: `current_user_can()` with proper capabilities
 - **SQL Security**: `$wpdb->prepare()` for all database queries
+- **Security Headers**: CSP with nonces, HSTS, X-Frame-Options, X-Content-Type-Options
 
 ### ⚡ WordPress Performance
 - **Query Optimization**: Efficient `WP_Query` usage, avoid N+1 problems
 - **Caching Integration**: WordPress object cache, transients
-- **Asset Management**: Proper `wp_enqueue_script()`/`wp_enqueue_style()`
+- **Asset Management**: Script Modules (`wp_enqueue_script_module()`) and proper enqueueing
 - **Hook Optimization**: Appropriate priorities and conditional loading
 - **Database Design**: Meta vs custom tables optimization
+- **Core Web Vitals**: LCP < 2.5s, INP < 200ms, CLS < 0.1
+- **Speculation Rules API**: Support for instant navigation pre-rendering
 
 ### 🎨 WordPress Standards
 - **Coding Standards**: WordPress Coding Standards (WPCS) compliance
-- **File Structure**: Proper WordPress plugin/theme architecture
+- **File Structure**: Block theme architecture (theme.json v3, /templates/, /parts/, /patterns/)
 - **Internationalization**: Translation-ready with `__()`, `_e()`
 - **Documentation**: WordPress phpDoc standards
 - **Testing**: PHPUnit with `WP_UnitTestCase`
+- **Accessibility**: WCAG 2.1 AA compliance
+
+### 🧩 WordPress Modern Patterns
+- **Block Themes / FSE**: theme.json v3, template parts, block patterns, style variations
+- **Interactivity API**: Modern frontend interactions (replacing jQuery patterns)
+- **Script Modules**: `wp_enqueue_script_module()` for ES module loading
+- **Custom Blocks**: block.json with apiVersion 3, `viewScriptModule`
+- **PHP 8.2+**: Typed properties, enums, readonly classes, match expressions
 
 ### 🌐 WordPress Multisite
 - **Network vs Site**: Proper option handling (`get_site_option()` vs `get_option()`)
@@ -233,8 +244,8 @@ We've created a complete enterprise development guide:
 ## 🛠️ Prerequisites
 
 ### Required Software
-- **WordPress** 6.0+ (recommended 6.4+)
-- **PHP** 8.0+ 
+- **WordPress** 6.7+ (recommended 6.8+)
+- **PHP** 8.2+ (recommended 8.4+ for best performance)
 - **Node.js** 18+
 - **Git**
 - **Claude Code CLI** and/or **Claude Desktop**
@@ -331,8 +342,8 @@ Projects using WordPress Claude Agents typically achieve:
  * Plugin Name: My WordPress Plugin
  * Description: Enterprise WordPress plugin with proper architecture
  * Version: 1.0.0
- * Requires at least: 6.0
- * Requires PHP: 8.0
+ * Requires at least: 6.7
+ * Requires PHP: 8.2
  */
 
 // Prevent direct access
@@ -377,27 +388,27 @@ new My_WordPress_Plugin();
 ```php
 <?php
 /**
- * WordPress security implementation example
+ * WordPress security implementation example (PHP 8.2+)
  */
 
 // Input sanitization
-$user_input = sanitize_text_field( wp_unslash( $_POST['user_data'] ) );
+$user_input = sanitize_text_field( wp_unslash( $_POST['user_data'] ?? '' ) );
 
 // Output escaping
 echo '<h1>' . esc_html( $title ) . '</h1>';
 echo '<img src="' . esc_url( $image_url ) . '" alt="' . esc_attr( $alt_text ) . '">';
 
 // Nonce verification
-if ( wp_verify_nonce( $_POST['nonce'], 'my_action' ) && current_user_can( 'edit_posts' ) ) {
+if ( wp_verify_nonce( $_POST['nonce'] ?? '', 'my_action' ) && current_user_can( 'edit_posts' ) ) {
     // Process secure action
 }
 
-// Database queries
-$results = $wpdb->get_results( 
-    $wpdb->prepare( 
-        "SELECT * FROM {$wpdb->posts} WHERE post_title = %s", 
-        $search_term 
-    ) 
+// Database queries with $wpdb->prepare()
+$results = $wpdb->get_results(
+    $wpdb->prepare(
+        "SELECT * FROM {$wpdb->posts} WHERE post_title = %s",
+        $search_term
+    )
 );
 ```
 
@@ -417,39 +428,41 @@ if ( false === $data ) {
     wp_cache_set( $cache_key, $data, 'my_plugin', HOUR_IN_SECONDS );
 }
 
-// Transients for persistent caching
-$data = get_transient( 'my_expensive_data' );
-if ( false === $data ) {
-    $data = very_expensive_operation();
-    set_transient( 'my_expensive_data', $data, DAY_IN_SECONDS );
-}
-
-// Efficient queries
+// Efficient queries (Core Web Vitals optimized)
 $posts = new WP_Query( array(
-    'post_type' => 'product',
-    'posts_per_page' => 20,
-    'no_found_rows' => true, // Skip pagination count
+    'post_type'              => 'product',
+    'posts_per_page'         => 20,
+    'no_found_rows'          => true,  // Skip pagination count when not needed
     'update_post_meta_cache' => false, // Skip if not needed
     'update_post_term_cache' => false, // Skip if not needed
 ) );
+
+// Modern Script Modules (WordPress 6.5+)
+wp_enqueue_script_module(
+    'my-plugin-frontend',
+    plugin_dir_url( __FILE__ ) . 'assets/js/frontend.js',
+    array( '@wordpress/interactivity' ),
+    '1.0.0'
+);
 ```
 
 ## 📈 Roadmap
 
 ### Upcoming Features
-- **WordPress Block Development** specialized agent
 - **WooCommerce Integration** agents
 - **WordPress CLI Integration** enhancements
 - **Team Collaboration** features
-- **Advanced Security** scanning integration
-- **Performance Monitoring** automation
+- **Advanced Security** scanning integration (CSP policy generation)
+- **Performance Monitoring** automation (Core Web Vitals CI)
+- **Block Pattern Library** agent for reusable design patterns
 
 ### Long-term Goals
 - WordPress.org plugin directory submission tools
 - WordPress VIP deployment automation
 - Advanced multisite management
-- Headless WordPress development support
+- Headless WordPress development support (REST API / GraphQL)
 - WordPress enterprise hosting integration
+- AI-powered security threat detection integration
 
 ## 🎉 Getting Started Checklist
 

@@ -203,34 +203,44 @@ CRITICAL: One WordPress task at a time. Mark WordPress in_progress → complete 
 # WordPress Coding Standards
 phpcs --standard=WordPress /path/to/wordpress/code
 
-# WordPress Security Scanning
-wpscan --update --url http://localhost/wordpress
+# WordPress Static Analysis (PHP 8.2+ compatibility)
+phpstan analyse --level=8 /path/to/wordpress/code
 
 # WordPress Performance Testing
 wp profile stage run --url=http://localhost/wordpress
 
 # WordPress Plugin Testing
-wp plugin test my-plugin
+phpunit --testsuite=plugin
 
-# WordPress Theme Testing  
-wp theme test my-theme
+# WordPress Theme Testing
+phpunit --testsuite=theme
+
+# WordPress Block Testing (Script Modules, Interactivity API)
+npx wp-scripts test-unit-js
+npx wp-scripts build --experimental-modules
 
 # WordPress Multisite Testing (if applicable)
-wp multisite test
+wp site list && phpunit --group=multisite
 
 # WordPress Database Testing
 wp db check
 wp db optimize
+
+# WordPress Core Web Vitals Audit
+# Use Lighthouse CI or web-vitals library for LCP, INP, CLS
 ```
 
 #### WordPress PASS/FAIL Criteria
 ✅ WordPress PASS Requirements:
 - 100% existing WordPress tests pass - NO EXCEPTIONS
 - WordPress coding standards (WPCS) compliance - zero violations
-- WordPress security scan clean - no vulnerabilities
-- WordPress performance within 5% of baseline
+- PHPStan level 8 analysis clean - zero errors
+- WordPress security audit clean - no vulnerabilities
+- WordPress performance within 5% of baseline (Core Web Vitals verified)
 - All WordPress linters pass with zero warnings
 - WordPress multisite compatibility verified (if applicable)
+- PHP 8.2+ compatibility verified (no deprecated patterns)
+- Block theme / Interactivity API patterns validated (if applicable)
 
 ❌ WordPress FAIL Actions:
 - ANY WordPress test failure → STOP and investigate with @agent-wp-debugger
@@ -315,11 +325,15 @@ Focus: Explain WHY WordPress decisions were made, not just WHAT WordPress code d
 - [ ] All WordPress todos marked completed
 - [ ] WordPress quality review score ≥ 95/100
 - [ ] WordPress documentation review passed
-- [ ] WordPress performance benchmarks documented
+- [ ] WordPress performance benchmarks documented (Core Web Vitals)
 - [ ] WordPress test coverage ≥ 90%
 - [ ] Zero WordPress security warnings
 - [ ] WordPress plan amendments documented
 - [ ] WordPress multisite compatibility verified
+- [ ] PHP 8.2+ compatibility verified
+- [ ] Block theme / FSE patterns validated (if applicable)
+- [ ] Interactivity API patterns validated (if applicable)
+- [ ] WCAG 2.1 AA accessibility verified
 
 ## WORDPRESS REWARDS AND PENALTIES
 
